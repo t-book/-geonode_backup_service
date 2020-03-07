@@ -1,0 +1,12 @@
+# ┌───────────── minute (0 - 59)
+# │     ┌───────────── hour (0 - 23)
+# │     │     ┌───────────── day of month (1 - 31)
+# │     │     │     ┌───────────── month (1 - 12)
+# │     │     │     │     ┌───────────── day of week (0 - 6) (Sunday to Saturday; 7 is also Sunday on some systems)
+# │     │     │     │     │
+
+ 0     00     *     *     *     mkdir -p /backups/database_`date +\%d\%m\%y`; pg_dump -h db -U geonode -C -d ${DATABASE} > /backups/database_`date +\%d\%m\%y`/${DATABASE}_daily.pgdump && echo "${DATABASE} dump successful"
+ 2     00     *     *     *     mkdir -p /backups/database_`date +\%d\%m\%y`; pg_dump -h db -U geonode -C -d ${DATABASE_GEO} > /backups/database_`date +\%d\%m\%y`/${DATABASE_GEO}_daily.pgdump && echo "${DATABASE_GEO} dump successful"
+10     00     *     *     *     rclone copy /geonode_statics /backups/statics_`date +\%d\%m\%y` --log-level ERROR && echo "geonode_statics copied successfully"
+15     00     *     *     *     rclone copy /geoserver-data-dir /backups/geoserver-data-dir_`date +\%d\%m\%y` --log-level ERROR && echo "geoserver-data-dir copied successfully"
+ 0      2     *     *     *     find /backups -maxdepth 1 -type d -mtime +${DAYS_TO_KEEP} -exec rm -rf {} \; && echo "Clean of /backups dir run"
